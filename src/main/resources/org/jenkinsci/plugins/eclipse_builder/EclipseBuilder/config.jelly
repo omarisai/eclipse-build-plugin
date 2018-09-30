@@ -2,10 +2,10 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
-    <f:entry title="${%ExeName}">
-        <select class="setting-input" name="EclipseBuilder.exeName">
+    <f:entry title="${%EclipseName}">
+        <select class="setting-input" name="EclipseBuilder.eclipseInstallationName">
             <j:forEach var="inst" items="${descriptor.installations}">
-                <f:option selected="${inst.name==instance.exeName}">${inst.name}</f:option>
+                <f:option selected="${inst.name==instance.eclipseInstallationName}">${inst.name}</f:option>
             </j:forEach>
         </select>
     </f:entry>

@@ -3,7 +3,7 @@
   <f:entry title="${%Name}" field="name">
     <f:textbox />
   </f:entry>
-  <f:entry title="${%Path to Exe}" field="home">
+  <f:entry title="${%Path to Eclipse}" field="home">
     <f:textbox />
   </f:entry>
   <f:entry title="${%Default parameters}" field="defaultArgs">

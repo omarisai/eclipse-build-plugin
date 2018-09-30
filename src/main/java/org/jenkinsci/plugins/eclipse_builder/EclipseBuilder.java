@@ -84,11 +84,11 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
         this.failBuild = f;
     }
 
-    public EclipseInstallation getInstallation() {
+    public EclipseInstallation getEclipseInstallation() {
         if (eclipseInstallationName == null) {
             return null;
         }
-        for (ExeInstallation i : DESCRIPTOR.getInstallations()) {
+        for (EclipseInstallation i : DESCRIPTOR.getInstallations()) {
             if (eclipseInstallationName.equals(i.getName())) {
                 return i;
             }
@@ -104,7 +104,7 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
         EnvVars env = null;
         EclipseInstallation installation = getEclipseInstallation();
         if (installation == null) {
-            throw new AbortException("EclipseInstallation not found.");
+            throw new AbortException("Eclipse Installation not found.");
         }
         installation = installation.forNode(EclipseInstallation.workspaceToNode(workspace), tl);
 
@@ -116,7 +116,7 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
         // eclipsec path.
         String eclipsecPath = getEclipsecPath(installation, launcher, tl);
         if (StringUtil.isNullOrSpace(eclipsecPath)) {
-            throw new AbortException("Exe path is blank.");
+            throw new AbortException("Eclipse path is blank.");
         }
         args.add(eclipsecPath);
 
@@ -144,21 +144,21 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
      * @throws IOException
      */
     private String getEclipsecPath(EclipseInstallation installation, Launcher launcher, TaskListener tl) throws InterruptedException, IOException {
-        String pathToExe = installation.getHome();
-        FilePath exec = new FilePath(launcher.getChannel(), pathToExe);
+        String pathToEclipse = installation.getHome();
+        FilePath exec = new FilePath(launcher.getChannel(), pathToEclipse);
 
         try {
             if (!exec.exists()) {
-                tl.fatalError(pathToExe + " doesn't exist");
+                tl.fatalError(pathToEclipse + " doesn't exist");
                 return null;
             }
         } catch (IOException e) {
-            tl.fatalError("Failed checking for existence of " + pathToExe);
+            tl.fatalError("Failed checking for existence of " + pathToEclipse);
             return null;
         }
 
-        tl.getLogger().println("Path To exe: " + pathToExe);
-        return StringUtil.appendQuote(pathToExe);
+        tl.getLogger().println("Path To eclipse: " + pathToEclipse);
+        return StringUtil.appendQuote(pathToEclipse);
     }
 
     /**
@@ -286,10 +286,10 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
         }
 
         /**
-         * Obtains the {@link ExeInstallation.DescriptorImpl} instance.
+         * Obtains the {@link EclipseInstallation.DescriptorImpl} instance.
          */
         public EclipseInstallation.DescriptorImpl getToolDescriptor() {
-            return ToolInstallation.all().get(ExeInstallation.DescriptorImpl.class);
+            return ToolInstallation.all().get(EclipseInstallation.DescriptorImpl.class);
         }
 
         @Override

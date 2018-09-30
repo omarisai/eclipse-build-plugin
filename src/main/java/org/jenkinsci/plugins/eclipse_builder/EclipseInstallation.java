@@ -37,14 +37,14 @@ public final class EclipseInstallation extends ToolInstallation implements NodeS
     }
 
     @Override
-    public ExeInstallation forEnvironment(EnvVars environment) {
+    public EclipseInstallation forEnvironment(EnvVars environment) {
         return new EclipseInstallation(getName(), environment.expand(getHome()), this.defaultArgs);
     }
 
     @Override
     protected Object readResolve() {
-        if (this.pathToExe != null) {
-            return new EclipseInstallation(this.getName(), this.pathToExe, this.defaultArgs);
+        if (this.pathToEclipse != null) {
+            return new EclipseInstallation(this.getName(), this.pathToEclipse, this.defaultArgs);
         }
         return this;
     }
@@ -84,7 +84,7 @@ public final class EclipseInstallation extends ToolInstallation implements NodeS
 
         @Override
         public EclipseInstallation[] getInstallations() {
-            return Jenkins.getInstance().getDescriptorByType(ExeBuilder.DescriptorImpl.class).getInstallations();
+            return Jenkins.getInstance().getDescriptorByType(EclipseBuilder.DescriptorImpl.class).getInstallations();
         }
 
         @Override
