@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    This plug-in is used to run Windows executables
+    This plug-in is used to build eclipse projects on windows, not tested on linux.
 </div>
