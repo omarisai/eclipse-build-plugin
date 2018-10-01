@@ -16,41 +16,38 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
-* @author Yasuyuki Saito
+* @author Yasuyuki Saito, Omar Isai Pinales Ayala
 */
 public final class EclipseInstallation extends ToolInstallation implements NodeSpecific<EclipseInstallation>, EnvironmentSpecific<EclipseInstallation> {
 
     /** */
     private transient String pathToEclipse;
 
-    private final String defaultArgs;
-
     @DataBoundConstructor
-    public EclipseInstallation(String name, String home, String defaultArgs) {
+    public EclipseInstallation(String name, String home) {
         super(name, home, null);
-        this.defaultArgs = Util.fixEmptyAndTrim(defaultArgs);
     }
 
     @Override
     public EclipseInstallation forNode(Node node, TaskListener log) throws IOException, InterruptedException {
-        return new EclipseInstallation(getName(), translateFor(node, log), this.defaultArgs);
+        return new EclipseInstallation(getName(), translateFor(node, log));
     }
 
     @Override
     public EclipseInstallation forEnvironment(EnvVars environment) {
-        return new EclipseInstallation(getName(), environment.expand(getHome()), this.defaultArgs);
+        return new EclipseInstallation(getName(), environment.expand(getHome()));
     }
 
     @Override
     protected Object readResolve() {
         if (this.pathToEclipse != null) {
-            return new EclipseInstallation(this.getName(), this.pathToEclipse, this.defaultArgs);
+            return new EclipseInstallation(this.getName(), this.pathToEclipse);
         }
         return this;
     }
 
     public String getDefaultArgs() {
-        return this.defaultArgs;
+        return "--launcher.suppressErrors -nosplash -application org.eclipse.cdt.managedbuilder.core.headlessbuild";
     }
 
     /**

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.lang.StringBuilder;
 import javax.annotation.CheckForNull;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
@@ -33,26 +34,36 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 /**
- * @author Yasuyuki Saito
+ * @author Yasuyuki Saito, Omar Isai Pinales Ayala
  */
 public class EclipseBuilder extends Builder implements SimpleBuildStep {
 
     private final String eclipseInstallationName;
     @CheckForNull
-    private String cmdLineArgs;
-    private boolean failBuild = DescriptorImpl.DEFAULTFAILBUILD;
+    private String workspacePath;
+    private String projectsPaths;
+    private String buildList;
+    private boolean cleanBuild = DescriptorImpl.DEFAULT_CLEAN_BUILD;
+    private boolean failBuild = DescriptorImpl.DEFAULT_FAIL_BUILD;
 
     /**
      *
      * @param eclipseInstallationName
-     * @param cmdLineArgs
+     * @param workspacePath
+     * @param projectsPaths
+     * @param buildList
+     * @param cleanBuild
      * @param failBuild
      */
     
     @Deprecated
-    public EclipseBuilder(String eclipseInstallationName, String cmdLineArgs, boolean failBuild) {
+    public EclipseBuilder(String eclipseInstallationName, String workspacePath, String projectsPaths, String buildList,
+            boolean cleanBuild, boolean failBuild) {
         this.eclipseInstallationName = eclipseInstallationName;
-        this.cmdLineArgs = cmdLineArgs;
+        this.workspacePath = workspacePath;
+        this.projectsPaths = projectsPaths;
+        this.buildList = buildList;
+        this.cleanBuild = cleanBuild;
         this.failBuild = failBuild;
     }
 
@@ -66,15 +77,44 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
     }
 
     @CheckForNull
-    public String getCmdLineArgs() {
-        return cmdLineArgs;
+    public String getWorkspacePath() {
+        return workspacePath;
     }
 
     @DataBoundSetter
-    public void setCmdLineArgs(String args) {
-        this.cmdLineArgs = Util.fixEmptyAndTrim(args);
+    public void setWorkspacePath(String args) {
+        this.workspacePath = Util.fixEmptyAndTrim(args);
+    }
+    
+    @CheckForNull
+    public String getProjectsPaths() {
+        return projectsPaths;
     }
 
+    @DataBoundSetter
+    public void setProjectsPaths(String args) {
+        this.projectsPaths = Util.fixEmptyAndTrim(args);
+    }
+    
+    @CheckForNull
+    public String getBuildList() {
+        return buildList;
+    }
+
+    @DataBoundSetter
+    public void setBuildList(String args) {
+        this.buildList = Util.fixEmptyAndTrim(args);
+    }
+
+    public boolean getCleanBuild() {
+        return cleanBuild;
+    }
+
+    @DataBoundSetter
+    public void setCleanBuild(boolean f) {
+        this.cleanBuild = f;
+    }
+    
     public boolean getFailBuild() {
         return failBuild;
     }
@@ -125,9 +165,42 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
             args.addAll(getArguments(run, workspace, tl, installation.getDefaultArgs()));
         }
 
-        // Manual Command Line String
-        if (!StringUtil.isNullOrSpace(cmdLineArgs)) {
-            args.addAll(getArguments(run, workspace, tl, cmdLineArgs));
+        // Get Command Line String
+        StringBuilder builder = new StringBuilder();
+        
+        //Add workspace
+        if (!StringUtil.isNullOrSpace(workspacePath)) {
+            builder.append("-data " + workspacePath + "\n");
+        }
+        
+        //Add projects
+        if (!StringUtil.isNullOrSpace(projectsPaths)) {
+            String projects[] = projectsPaths.split("[\\r\\n]+");
+            
+            for (int project = 0; project < projects.length; project++) {
+                builder.append("-import " + workspacePath + "\\" + projects[project] + "\n");
+            }
+        }
+        
+        //Load clean option
+        if (cleanBuild) {
+            builder.append("-cleanBuild all\n");
+        }
+        
+        //Load projects to build
+        if (!StringUtil.isNullOrSpace(buildList)) {
+            String projects[] = buildList.split("[\\r\\n]+");
+            for (int project = 0; project < projects.length; project++) {
+                builder.append("-build " + projects[project] + "\n");
+            }
+        }
+        else {
+            builder.append("-build all\n");
+        }
+        
+        //Load all the arguments
+        if (!StringUtil.isNullOrSpace(builder.toString())) {
+            args.addAll(getArguments(run, workspace, tl, builder.toString()));
         }
 
         // eclipse run.
@@ -144,7 +217,7 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
      * @throws IOException
      */
     private String getEclipsecPath(EclipseInstallation installation, Launcher launcher, TaskListener tl) throws InterruptedException, IOException {
-        String pathToEclipse = installation.getHome();
+        String pathToEclipse = installation.getHome() + "\\eclipsec.exe";
         FilePath exec = new FilePath(launcher.getChannel(), pathToEclipse);
 
         try {
@@ -262,7 +335,8 @@ public class EclipseBuilder extends Builder implements SimpleBuildStep {
      */
     @Symbol("runexe")
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
-        public static final boolean DEFAULTFAILBUILD = true;
+        public static final boolean DEFAULT_CLEAN_BUILD = false;
+        public static final boolean DEFAULT_FAIL_BUILD = true;
         @CopyOnWrite
         private volatile EclipseInstallation[] installations = new EclipseInstallation[0];
 

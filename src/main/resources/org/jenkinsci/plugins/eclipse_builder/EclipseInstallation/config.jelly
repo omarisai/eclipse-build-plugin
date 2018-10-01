@@ -6,7 +6,4 @@
   <f:entry title="${%Path to Eclipse}" field="home">
     <f:textbox />
   </f:entry>
-  <f:entry title="${%Default parameters}" field="defaultArgs">
-    <f:expandableTextbox />
-  </f:entry>
 </j:jelly>
